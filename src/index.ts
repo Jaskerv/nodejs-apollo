@@ -23,12 +23,12 @@ const typeDefs = gql`
 
 const books = [
   {
-    title: "Big mommy's milkers",
-    author: 'Nanna Banana',
+    title: "Big",
+    author: 'Nancy',
   },
   {
-    title: 'On Cap',
-    author: 'Ryce Milk',
+    title: 'On God',
+    author: 'Ryan',
   },
 ];
 
