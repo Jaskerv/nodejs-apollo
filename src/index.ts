@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require('apollo-server');
+import { gql } from 'apollo-server';
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -21,33 +21,38 @@ const typeDefs = gql`
   }
 `;
 
-const books = [
-  {
-    title: "Big",
-    author: 'Nancy',
-  },
-  {
-    title: 'On God',
-    author: 'Ryan',
-  },
-];
+// const books = [
+//   {
+//     title: "Big",
+//     author: 'Nancy',
+//   },
+//   {
+//     title: 'On God',
+//     author: 'Ryan',
+//   },
+// ];
 
-// Resolvers define the technique for fetching the types defined in the
-// schema. This resolver retrieves books from the "books" array above.
-const resolvers = {
-  Query: {
-    book: (parent: any, args: any, context: any, info: any)=>{
-      return books[args.id]
-    },
-    books: () => books,
-  },
-};
+// // Resolvers define the technique for fetching the types defined in the
+// // schema. This resolver retrieves books from the "books" array above.
+// const resolvers = {
+//   Query: {
+//     book: (parent: any, args: any, context: any, info: any)=>{
+//       return books[args.id]
+//     },
+//     books: () => books,
+//   },
+// };
 
-// The ApolloServer constructor requires two parameters: your schema
-// definition and your set of resolvers.
-const server = new ApolloServer({ typeDefs, resolvers });
+// // The ApolloServer constructor requires two parameters: your schema
+// // definition and your set of resolvers.
+// const server = new ApolloServer({ typeDefs, resolvers });
 
-// The `listen` method launches a web server.
-server.listen(3000).then((props: any) => {
-  console.log("server running on " + props.url);
-});
+// // The `listen` method launches a web server.
+// server.listen(3000).then((props: any) => {
+//   console.log("server running on " + props.url);
+// });
+
+console.log('hello world');
+
+console.log(typeDefs);
+console.log('12');
