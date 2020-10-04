@@ -1,17 +1,22 @@
-import { MikroORM } from '@mikro-orm/core';
+import 'reflect-metadata';
+import { createConnection } from 'typeorm';
+import path from 'path';
 import { Post } from './entities/Post';
-import mikroOrmConfig from './mikro-orm.config';
 
 const main = async () => {
-  const orm = await MikroORM.init(mikroOrmConfig);
-  await orm.getMigrator().up();
-  const post = new Post('title');
-  await orm.em.persist(post);
-  await orm.em.flush();
-  console.log({ Post, post });
+  const conn = await createConnection({
+    type: 'postgres',
+    host: 'localhost',
+    port: 5432,
+    username: 'docker',
+    password: 'docker',
+    database: 'lireddit',
+    entities: [Post],
+    migrations: [path.join(__dirname, './migrations/*')],
+    logging: true,
+  });
 
-  // console.log('------------Sql 2 ----------------');
-  // await orm.em.nativeInsert(Post, { title: 'Post 2' });
+  await conn.runMigrations();
 };
 
-main().catch((error) => console.log(error));
+main();

@@ -9,14 +9,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Migration20201002040915 = void 0;
-const migrations_1 = require("@mikro-orm/migrations");
-class Migration20201002040915 extends migrations_1.Migration {
-    up() {
+exports.Initial1601797988569 = void 0;
+class Initial1601797988569 {
+    constructor() {
+        this.name = 'Initial1601797988569';
+    }
+    up(queryRunner) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.addSql('create table "post" ("id" serial primary key, "created_at" jsonb not null, "updated_at" jsonb not null, "title" varchar(255) not null);');
+            yield queryRunner.query('CREATE TABLE "post" ("id" SERIAL NOT NULL, "title" character varying(100) NOT NULL, "description" text NOT NULL, "likes" integer NOT NULL, "views" integer NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_be5fda3aac270b134ff9c21cdee" PRIMARY KEY ("id"))');
+        });
+    }
+    down(queryRunner) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield queryRunner.query('DROP TABLE "post"');
         });
     }
 }
-exports.Migration20201002040915 = Migration20201002040915;
-//# sourceMappingURL=Migration20201002040915.js.map
+exports.Initial1601797988569 = Initial1601797988569;
+//# sourceMappingURL=1601797988569-Initial.js.map
