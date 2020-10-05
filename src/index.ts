@@ -15,7 +15,6 @@ const main = async () => {
     migrations: [path.join(__dirname, './migrations/*')],
     logging: true,
   });
-
   await conn.runMigrations();
 };
 
