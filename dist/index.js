@@ -15,7 +15,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const typeorm_1 = require("typeorm");
 const path_1 = __importDefault(require("path"));
+const express_1 = __importDefault(require("express"));
+const apollo_server_express_1 = require("apollo-server-express");
+const type_graphql_1 = require("type-graphql");
 const Post_1 = require("./entities/Post");
+const post_1 = require("./resolvers/post");
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const conn = yield typeorm_1.createConnection({
         type: 'postgres',
@@ -29,6 +33,17 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         logging: true,
     });
     yield conn.runMigrations();
+    const app = express_1.default();
+    const apolloServer = new apollo_server_express_1.ApolloServer({
+        schema: yield type_graphql_1.buildSchema({
+            resolvers: [post_1.PostResolver],
+            validate: false,
+        }),
+    });
+    apolloServer.applyMiddleware({ app });
+    app.listen(4000, () => {
+        console.log('server started on localhost:4000 🚀');
+    });
 });
 main();
 //# sourceMappingURL=index.js.map
