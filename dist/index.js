@@ -22,18 +22,6 @@ const colors_1 = __importDefault(require("colors"));
 const User_1 = __importDefault(require("./resolvers/User"));
 const Post_1 = __importDefault(require("./resolvers/Post"));
 const constants_1 = require("./constants");
-colors_1.default.setTheme({
-    silly: 'rainbow',
-    input: 'grey',
-    verbose: 'cyan',
-    prompt: 'grey',
-    info: 'green',
-    data: 'grey',
-    help: 'cyan',
-    warn: 'yellow',
-    debug: 'blue',
-    error: 'red',
-});
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const conn = yield typeorm_1.createConnection({
         type: 'postgres',

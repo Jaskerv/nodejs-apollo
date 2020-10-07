@@ -9,19 +9,6 @@ import UserResolver from './resolvers/User';
 import PostResolver from './resolvers/Post';
 import { __port__ } from './constants';
 
-colors.setTheme({
-  silly: 'rainbow',
-  input: 'grey',
-  verbose: 'cyan',
-  prompt: 'grey',
-  info: 'green',
-  data: 'grey',
-  help: 'cyan',
-  warn: 'yellow',
-  debug: 'blue',
-  error: 'red',
-});
-
 const main = async () => {
   const conn = await createConnection({
     type: 'postgres',
@@ -32,6 +19,12 @@ const main = async () => {
     database: 'lireddit',
     entities: [path.join(__dirname, './entities/*')],
     migrations: [path.join(__dirname, './migrations/*')],
+    /**
+     * ! Development or debugging only!
+     * ! Do not enable dropSchema in production
+     * * logging - outputs sql
+     * * dropSchema - Drops the schema each time
+     */
     logging: true,
     // dropSchema: true,
   });
