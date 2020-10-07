@@ -18,8 +18,22 @@ const path_1 = __importDefault(require("path"));
 const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
+const colors_1 = __importDefault(require("colors"));
+const User_1 = __importDefault(require("./resolvers/User"));
 const Post_1 = __importDefault(require("./resolvers/Post"));
 const constants_1 = require("./constants");
+colors_1.default.setTheme({
+    silly: 'rainbow',
+    input: 'grey',
+    verbose: 'cyan',
+    prompt: 'grey',
+    info: 'green',
+    data: 'grey',
+    help: 'cyan',
+    warn: 'yellow',
+    debug: 'blue',
+    error: 'red',
+});
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const conn = yield typeorm_1.createConnection({
         type: 'postgres',
@@ -36,13 +50,14 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = express_1.default();
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: yield type_graphql_1.buildSchema({
-            resolvers: [Post_1.default],
+            resolvers: [Post_1.default, User_1.default],
             validate: false,
         }),
     });
     apolloServer.applyMiddleware({ app });
     app.listen(constants_1.__port__, () => {
-        console.log(`server started on http://localhost:${constants_1.__port__} 🚀`);
+        console.log(`\nServer started on port ${colors_1.default.yellow(`${constants_1.__port__}`)}\n`);
+        console.log(`${'Graphql playgound here:'.blue} ${colors_1.default.magenta.underline(`http://localhost:${constants_1.__port__}/graphql`)} 🚀\n`);
     });
 });
 main();

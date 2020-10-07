@@ -4,8 +4,23 @@ import path from 'path';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
+import colors from 'colors';
+import UserResolver from './resolvers/User';
 import PostResolver from './resolvers/Post';
 import { __port__ } from './constants';
+
+colors.setTheme({
+  silly: 'rainbow',
+  input: 'grey',
+  verbose: 'cyan',
+  prompt: 'grey',
+  info: 'green',
+  data: 'grey',
+  help: 'cyan',
+  warn: 'yellow',
+  debug: 'blue',
+  error: 'red',
+});
 
 const main = async () => {
   const conn = await createConnection({
@@ -26,7 +41,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [PostResolver],
+      resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
   });
@@ -34,7 +49,8 @@ const main = async () => {
   apolloServer.applyMiddleware({ app });
 
   app.listen(__port__, () => {
-    console.log(`server started on http://localhost:${__port__} 🚀`);
+    console.log(`\nServer started on port ${colors.yellow(`${__port__}`)}\n`);
+    console.log(`${'Graphql playgound here:'.blue} ${colors.magenta.underline(`http://localhost:${__port__}/graphql`)} 🚀\n`);
   });
 };
 

@@ -37,7 +37,7 @@ export default class PostResolver {
 
   @Mutation(() => Post, { nullable: true })
   async updatePost(
-    @Arg('id', () => Int, { nullable: false }) id: number,
+    @Arg('id', () => Int) id: number,
     @Arg('title', { nullable: true }) title: string,
     @Arg('description', { nullable: true }) description: string,
     @Arg('likes', () => Int, { defaultValue: 0 }) likes: number,
@@ -55,7 +55,7 @@ export default class PostResolver {
 
   @Mutation(() => Boolean, { nullable: true })
   async deletePost(
-    @Arg('id', () => Int, { nullable: false }) id: number,
+    @Arg('id', () => Int) id: number,
   ) : Promise<boolean> {
     const post = await Post.findOne(id);
     if (!post) return false;

@@ -12,12 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const type_graphql_1 = require("type-graphql");
 const typeorm_1 = require("typeorm");
 let BasicEntity = class BasicEntity extends typeorm_1.BaseEntity {
-    constructor() {
-        super(...arguments);
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
-        this.deletedAt = new Date();
-    }
 };
 __decorate([
     type_graphql_1.Field(),
@@ -27,17 +21,17 @@ __decorate([
 __decorate([
     type_graphql_1.Field(() => Date),
     typeorm_1.CreateDateColumn(),
-    __metadata("design:type", Object)
+    __metadata("design:type", Date)
 ], BasicEntity.prototype, "createdAt", void 0);
 __decorate([
     type_graphql_1.Field(() => Date),
     typeorm_1.UpdateDateColumn(),
-    __metadata("design:type", Object)
+    __metadata("design:type", Date)
 ], BasicEntity.prototype, "updatedAt", void 0);
 __decorate([
-    type_graphql_1.Field(() => Date),
+    type_graphql_1.Field(() => Date, { nullable: true }),
     typeorm_1.DeleteDateColumn(),
-    __metadata("design:type", Object)
+    __metadata("design:type", Date)
 ], BasicEntity.prototype, "deletedAt", void 0);
 BasicEntity = __decorate([
     type_graphql_1.InterfaceType()

@@ -40,7 +40,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Post.prototype, "views", void 0);
 Post = __decorate([
-    type_graphql_1.ObjectType(),
+    type_graphql_1.ObjectType({ implements: BasicEntity_1.default }),
     typeorm_1.Entity()
 ], Post);
 exports.default = Post;

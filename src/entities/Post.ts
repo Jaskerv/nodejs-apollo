@@ -5,9 +5,17 @@ import {
 } from 'typeorm';
 import BasicEntity from '../util/BasicEntity';
 
-@ObjectType()
+@ObjectType({ implements: BasicEntity })
 @Entity()
 export default class Post extends BasicEntity {
+  id: number;
+
+  createdAt: Date;
+
+  updatedAt: Date;
+
+  deletedAt: Date;
+
   @Field()
   @Column({
     length: 100,

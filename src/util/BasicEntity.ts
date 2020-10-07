@@ -11,13 +11,13 @@ export default abstract class BasicEntity extends BaseEntity {
 
   @Field(() => Date)
   @CreateDateColumn()
-  createdAt = new Date();
+  createdAt: Date;
 
   @Field(() => Date)
   @UpdateDateColumn()
-  updatedAt = new Date();
+  updatedAt: Date;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @DeleteDateColumn()
-  deletedAt = new Date();
+  deletedAt: Date;
 }

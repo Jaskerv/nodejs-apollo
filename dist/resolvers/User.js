@@ -27,6 +27,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const type_graphql_1 = require("type-graphql");
 const argon2_1 = __importDefault(require("argon2"));
 const User_1 = __importDefault(require("../entities/User"));
+let PasswordConfirmInput = class PasswordConfirmInput {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], PasswordConfirmInput.prototype, "password", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], PasswordConfirmInput.prototype, "confirmPassword", void 0);
+PasswordConfirmInput = __decorate([
+    type_graphql_1.InputType()
+], PasswordConfirmInput);
+let UsernamePasswordConfirmInput = class UsernamePasswordConfirmInput {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], UsernamePasswordConfirmInput.prototype, "username", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], UsernamePasswordConfirmInput.prototype, "password", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], UsernamePasswordConfirmInput.prototype, "confirmPassword", void 0);
+UsernamePasswordConfirmInput = __decorate([
+    type_graphql_1.InputType()
+], UsernamePasswordConfirmInput);
 let UsernamePasswordInput = class UsernamePasswordInput {
 };
 __decorate([
@@ -37,13 +67,51 @@ __decorate([
     type_graphql_1.Field(),
     __metadata("design:type", String)
 ], UsernamePasswordInput.prototype, "password", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", String)
-], UsernamePasswordInput.prototype, "confirmPassword", void 0);
 UsernamePasswordInput = __decorate([
     type_graphql_1.InputType()
 ], UsernamePasswordInput);
+let FieldError = class FieldError {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], FieldError.prototype, "field", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], FieldError.prototype, "message", void 0);
+FieldError = __decorate([
+    type_graphql_1.ObjectType()
+], FieldError);
+let UserResponse = class UserResponse {
+};
+__decorate([
+    type_graphql_1.Field(() => [FieldError], { nullable: true }),
+    __metadata("design:type", Array)
+], UserResponse.prototype, "errors", void 0);
+__decorate([
+    type_graphql_1.Field(() => User_1.default, { nullable: true }),
+    __metadata("design:type", User_1.default)
+], UserResponse.prototype, "user", void 0);
+__decorate([
+    type_graphql_1.Field(() => User_1.default, { nullable: true }),
+    __metadata("design:type", Array)
+], UserResponse.prototype, "users", void 0);
+UserResponse = __decorate([
+    type_graphql_1.ObjectType()
+], UserResponse);
+const idDoesNotExistError = {
+    errors: [{
+            field: 'id',
+            message: 'that user does not exist',
+        }],
+};
+const passwordMismatchError = {
+    errors: [{
+            field: 'confirmPassword',
+            message: 'password does not match',
+        }],
+};
 let UserResolver = class UserResolver {
     users() {
         return User_1.default.find({
@@ -53,38 +121,65 @@ let UserResolver = class UserResolver {
         });
     }
     user(id) {
-        return User_1.default.findOne(id);
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield User_1.default.findOne(id);
+            if (!user)
+                return idDoesNotExistError;
+            return { user };
+        });
     }
     register(options) {
         return __awaiter(this, void 0, void 0, function* () {
             if (options.password !== options.confirmPassword)
-                return null;
+                return passwordMismatchError;
             const hashedPassword = yield argon2_1.default.hash(options.password);
             const user = User_1.default.create({
                 username: options.username, password: hashedPassword,
             });
             yield user.save();
-            return user;
+            return { user };
         });
     }
-    updatePost(id) {
+    updatePassword(id, options) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield User_1.default.findOne(id);
             if (!user)
-                return null;
+                return idDoesNotExistError;
+            if (typeof options.password !== 'undefined'
+                && typeof options.confirmPassword !== 'undefined'
+                && options.password === options.confirmPassword) {
+                const hashedPassword = yield argon2_1.default.hash(options.password);
+                user.password = hashedPassword;
+            }
+            else
+                return passwordMismatchError;
             yield user.save();
-            return user;
+            return { user };
         });
     }
-    deletePost(id) {
+    login(options) {
         return __awaiter(this, void 0, void 0, function* () {
-            const post = yield User_1.default.findOne(id);
-            if (!post)
-                return false;
-            if (typeof (yield post.remove()) !== 'undefined') {
-                return true;
+            const user = yield User_1.default.findOne({ username: options.username });
+            if (!user) {
+                return {
+                    errors: [{
+                            field: 'username',
+                            message: 'that user does not exist',
+                        }],
+                };
             }
-            return false;
+            const valid = yield argon2_1.default.verify(user.password, options.password);
+            if (!valid) {
+                return {
+                    errors: [
+                        {
+                            field: 'password',
+                            message: 'invalid login',
+                        },
+                    ],
+                };
+            }
+            return { user };
         });
     }
 };
@@ -95,33 +190,34 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "users", null);
 __decorate([
-    type_graphql_1.Query(() => User_1.default, { nullable: true }),
+    type_graphql_1.Query(() => UserResponse, { nullable: true }),
     __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "user", null);
 __decorate([
-    type_graphql_1.Mutation(() => User_1.default, { nullable: true }),
+    type_graphql_1.Mutation(() => UserResponse, { nullable: true }),
+    __param(0, type_graphql_1.Arg('options')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [UsernamePasswordConfirmInput]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "register", null);
+__decorate([
+    type_graphql_1.Mutation(() => UserResponse, { nullable: true }),
+    __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int)),
+    __param(1, type_graphql_1.Arg('options')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, PasswordConfirmInput]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "updatePassword", null);
+__decorate([
+    type_graphql_1.Mutation(() => UserResponse, { nullable: true }),
     __param(0, type_graphql_1.Arg('options')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [UsernamePasswordInput]),
     __metadata("design:returntype", Promise)
-], UserResolver.prototype, "register", null);
-__decorate([
-    type_graphql_1.Mutation(() => User_1.default, { nullable: true }),
-    __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int, { nullable: false })),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
-    __metadata("design:returntype", Promise)
-], UserResolver.prototype, "updatePost", null);
-__decorate([
-    type_graphql_1.Mutation(() => Boolean, { nullable: true }),
-    __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int, { nullable: false })),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
-    __metadata("design:returntype", Promise)
-], UserResolver.prototype, "deletePost", null);
+], UserResolver.prototype, "login", null);
 UserResolver = __decorate([
     type_graphql_1.Resolver()
 ], UserResolver);

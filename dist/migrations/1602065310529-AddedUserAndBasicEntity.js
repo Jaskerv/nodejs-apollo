@@ -9,10 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddedUserAndBasicEntity1602061202063 = void 0;
-class AddedUserAndBasicEntity1602061202063 {
+exports.AddedUserAndBasicEntity1602065310529 = void 0;
+class AddedUserAndBasicEntity1602065310529 {
     constructor() {
-        this.name = 'AddedUserAndBasicEntity1602061202063';
+        this.name = 'AddedUserAndBasicEntity1602065310529';
     }
     up(queryRunner) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -27,5 +27,5 @@ class AddedUserAndBasicEntity1602061202063 {
         });
     }
 }
-exports.AddedUserAndBasicEntity1602061202063 = AddedUserAndBasicEntity1602061202063;
-//# sourceMappingURL=1602061202063-AddedUserAndBasicEntity.js.map
+exports.AddedUserAndBasicEntity1602065310529 = AddedUserAndBasicEntity1602065310529;
+//# sourceMappingURL=1602065310529-AddedUserAndBasicEntity.js.map

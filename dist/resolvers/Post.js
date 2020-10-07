@@ -100,7 +100,7 @@ __decorate([
 ], PostResolver.prototype, "createPost", null);
 __decorate([
     type_graphql_1.Mutation(() => Post_1.default, { nullable: true }),
-    __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int, { nullable: false })),
+    __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int)),
     __param(1, type_graphql_1.Arg('title', { nullable: true })),
     __param(2, type_graphql_1.Arg('description', { nullable: true })),
     __param(3, type_graphql_1.Arg('likes', () => type_graphql_1.Int, { defaultValue: 0 })),
@@ -111,7 +111,7 @@ __decorate([
 ], PostResolver.prototype, "updatePost", null);
 __decorate([
     type_graphql_1.Mutation(() => Boolean, { nullable: true }),
-    __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int, { nullable: false })),
+    __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)

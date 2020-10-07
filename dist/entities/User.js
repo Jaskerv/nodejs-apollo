@@ -28,7 +28,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
 User = __decorate([
-    type_graphql_1.ObjectType(),
+    type_graphql_1.ObjectType({ implements: BasicEntity_1.default }),
     typeorm_1.Entity()
 ], User);
 exports.default = User;
