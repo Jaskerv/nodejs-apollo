@@ -8,40 +8,39 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const type_graphql_1 = require("type-graphql");
 const typeorm_1 = require("typeorm");
-const BasicEntity_1 = __importDefault(require("../util/BasicEntity"));
-let Post = class Post extends BasicEntity_1.default {
+let BasicEntity = class BasicEntity extends typeorm_1.BaseEntity {
+    constructor() {
+        super(...arguments);
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
+        this.deletedAt = new Date();
+    }
 };
 __decorate([
     type_graphql_1.Field(),
-    typeorm_1.Column({
-        length: 100,
-    }),
-    __metadata("design:type", String)
-], Post.prototype, "title", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    typeorm_1.Column('text'),
-    __metadata("design:type", String)
-], Post.prototype, "description", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    typeorm_1.Column('integer'),
+    typeorm_1.PrimaryGeneratedColumn(),
     __metadata("design:type", Number)
-], Post.prototype, "likes", void 0);
+], BasicEntity.prototype, "id", void 0);
 __decorate([
-    type_graphql_1.Field(),
-    typeorm_1.Column('integer'),
-    __metadata("design:type", Number)
-], Post.prototype, "views", void 0);
-Post = __decorate([
-    type_graphql_1.ObjectType(),
-    typeorm_1.Entity()
-], Post);
-exports.default = Post;
-//# sourceMappingURL=Post.js.map
+    type_graphql_1.Field(() => Date),
+    typeorm_1.CreateDateColumn(),
+    __metadata("design:type", Object)
+], BasicEntity.prototype, "createdAt", void 0);
+__decorate([
+    type_graphql_1.Field(() => Date),
+    typeorm_1.UpdateDateColumn(),
+    __metadata("design:type", Object)
+], BasicEntity.prototype, "updatedAt", void 0);
+__decorate([
+    type_graphql_1.Field(() => Date),
+    typeorm_1.DeleteDateColumn(),
+    __metadata("design:type", Object)
+], BasicEntity.prototype, "deletedAt", void 0);
+BasicEntity = __decorate([
+    type_graphql_1.InterfaceType()
+], BasicEntity);
+exports.default = BasicEntity;
+//# sourceMappingURL=BasicEntity.js.map

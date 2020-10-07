@@ -1,15 +1,13 @@
 import { Field, ObjectType } from 'type-graphql';
 import {
-  BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  Entity,
 } from 'typeorm';
+import BasicEntity from '../util/BasicEntity';
 
 @ObjectType()
 @Entity()
-export class Post extends BaseEntity {
-  @Field()
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export default class Post extends BasicEntity {
   @Field()
   @Column({
     length: 100,
@@ -27,12 +25,4 @@ export class Post extends BaseEntity {
   @Field()
   @Column('integer')
   views: number;
-
-  @Field(() => Date)
-  @CreateDateColumn()
-  createdAt = new Date();
-
-  @Field(() => Date)
-  @UpdateDateColumn()
-  updatedAt = new Date();
 }

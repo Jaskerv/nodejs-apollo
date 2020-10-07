@@ -1,10 +1,10 @@
 import {
   Arg, Int, Mutation, Query, Resolver,
 } from 'type-graphql';
-import { Post } from '../entities/Post';
+import Post from '../entities/Post';
 
 @Resolver()
-export class PostResolver {
+export default class PostResolver {
   @Query(() => [Post])
   posts(): Promise<Post[]> {
     return Post.find({

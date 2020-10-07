@@ -15,33 +15,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const type_graphql_1 = require("type-graphql");
 const typeorm_1 = require("typeorm");
 const BasicEntity_1 = __importDefault(require("../util/BasicEntity"));
-let Post = class Post extends BasicEntity_1.default {
+let User = class User extends BasicEntity_1.default {
 };
 __decorate([
     type_graphql_1.Field(),
-    typeorm_1.Column({
-        length: 100,
-    }),
+    typeorm_1.Column({ type: 'text', unique: true }),
     __metadata("design:type", String)
-], Post.prototype, "title", void 0);
+], User.prototype, "username", void 0);
 __decorate([
     type_graphql_1.Field(),
-    typeorm_1.Column('text'),
+    typeorm_1.Column({ type: 'text', unique: true }),
     __metadata("design:type", String)
-], Post.prototype, "description", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    typeorm_1.Column('integer'),
-    __metadata("design:type", Number)
-], Post.prototype, "likes", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    typeorm_1.Column('integer'),
-    __metadata("design:type", Number)
-], Post.prototype, "views", void 0);
-Post = __decorate([
+], User.prototype, "password", void 0);
+User = __decorate([
     type_graphql_1.ObjectType(),
     typeorm_1.Entity()
-], Post);
-exports.default = Post;
-//# sourceMappingURL=Post.js.map
+], User);
+exports.default = User;
+//# sourceMappingURL=User.js.map

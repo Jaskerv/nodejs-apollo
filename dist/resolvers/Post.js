@@ -20,24 +20,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PostResolver = void 0;
 const type_graphql_1 = require("type-graphql");
-const Post_1 = require("../entities/Post");
+const Post_1 = __importDefault(require("../entities/Post"));
 let PostResolver = class PostResolver {
     posts() {
-        return Post_1.Post.find({
+        return Post_1.default.find({
             order: {
                 id: 'ASC',
             },
         });
     }
     post(id) {
-        return Post_1.Post.findOne(id);
+        return Post_1.default.findOne(id);
     }
     createPost(title, description, likes, views) {
         return __awaiter(this, void 0, void 0, function* () {
-            const post = Post_1.Post.create({
+            const post = Post_1.default.create({
                 title, description, likes, views,
             });
             yield post.save();
@@ -46,7 +48,7 @@ let PostResolver = class PostResolver {
     }
     updatePost(id, title, description, likes, views) {
         return __awaiter(this, void 0, void 0, function* () {
-            const post = yield Post_1.Post.findOne(id);
+            const post = yield Post_1.default.findOne(id);
             if (!post)
                 return null;
             if (typeof title === 'string')
@@ -63,7 +65,7 @@ let PostResolver = class PostResolver {
     }
     deletePost(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const post = yield Post_1.Post.findOne(id);
+            const post = yield Post_1.default.findOne(id);
             if (!post)
                 return false;
             if (typeof (yield post.remove()) !== 'undefined') {
@@ -74,20 +76,20 @@ let PostResolver = class PostResolver {
     }
 };
 __decorate([
-    type_graphql_1.Query(() => [Post_1.Post]),
+    type_graphql_1.Query(() => [Post_1.default]),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "posts", null);
 __decorate([
-    type_graphql_1.Query(() => Post_1.Post, { nullable: true }),
+    type_graphql_1.Query(() => Post_1.default, { nullable: true }),
     __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "post", null);
 __decorate([
-    type_graphql_1.Mutation(() => Post_1.Post),
+    type_graphql_1.Mutation(() => Post_1.default),
     __param(0, type_graphql_1.Arg('title')),
     __param(1, type_graphql_1.Arg('description')),
     __param(2, type_graphql_1.Arg('likes', () => type_graphql_1.Int, { defaultValue: 0 })),
@@ -97,7 +99,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "createPost", null);
 __decorate([
-    type_graphql_1.Mutation(() => Post_1.Post, { nullable: true }),
+    type_graphql_1.Mutation(() => Post_1.default, { nullable: true }),
     __param(0, type_graphql_1.Arg('id', () => type_graphql_1.Int, { nullable: false })),
     __param(1, type_graphql_1.Arg('title', { nullable: true })),
     __param(2, type_graphql_1.Arg('description', { nullable: true })),
@@ -117,5 +119,5 @@ __decorate([
 PostResolver = __decorate([
     type_graphql_1.Resolver()
 ], PostResolver);
-exports.PostResolver = PostResolver;
-//# sourceMappingURL=post.js.map
+exports.default = PostResolver;
+//# sourceMappingURL=Post.js.map

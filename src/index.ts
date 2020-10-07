@@ -4,8 +4,8 @@ import path from 'path';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
-import { Post } from './entities/Post';
-import { PostResolver } from './resolvers/post';
+import PostResolver from './resolvers/Post';
+import { __port__ } from './constants';
 
 const main = async () => {
   const conn = await createConnection({
@@ -15,9 +15,10 @@ const main = async () => {
     username: 'docker',
     password: 'docker',
     database: 'lireddit',
-    entities: [Post],
+    entities: [path.join(__dirname, './entities/*')],
     migrations: [path.join(__dirname, './migrations/*')],
     logging: true,
+    // dropSchema: true,
   });
   await conn.runMigrations();
 
@@ -32,8 +33,8 @@ const main = async () => {
 
   apolloServer.applyMiddleware({ app });
 
-  app.listen(4000, () => {
-    console.log('server started on localhost:4000 🚀');
+  app.listen(__port__, () => {
+    console.log(`server started on http://localhost:${__port__} 🚀`);
   });
 };
 
