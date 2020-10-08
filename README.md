@@ -1,5 +1,29 @@
-# Learning Backend Nodejs
-Using Typescript.
+# Full Stack NodeJs - Apollo GraphQL - NextJs - Typescript
+Learning project to learn 
+ - Typescript
+ - NodeJs
+ - Express
+ - Apollo Server & Client
+ - NextJs
+
+## Services
+These are the services required to run this application
+ - Redis
+ - PostgreSQL
+
+## Running the application
+
+Run ```docker-compose up``` to start required services.
+
+**Dev**
+
+```npm run dev```
+
+**Prod**
+
+```npm start```
+
+# Notes
 
 ## tsconfig
 Generate tsconfig
