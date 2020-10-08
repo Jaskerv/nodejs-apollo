@@ -30,6 +30,9 @@ Generate tsconfig
 ```npx tsconfig.json```
 
 ## nodemon vs tsc-watch
+
+In my opinion, tsc-watch is better than nodemon.
+
 ### nodemon
 ```
   "watch": "tsc -w",
