@@ -24,8 +24,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
 const Post_1 = __importDefault(require("../entities/Post"));
+const idDoesNotExistError = new apollo_server_express_1.ApolloError("This post doesn't exist");
 let PostResolver = class PostResolver {
     posts() {
         return Post_1.default.find({
@@ -35,7 +37,12 @@ let PostResolver = class PostResolver {
         });
     }
     post(id) {
-        return Post_1.default.findOne(id);
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield Post_1.default.findOne(id);
+            if (!post)
+                throw idDoesNotExistError;
+            return post;
+        });
     }
     createPost(title, description, likes, views) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -50,7 +57,7 @@ let PostResolver = class PostResolver {
         return __awaiter(this, void 0, void 0, function* () {
             const post = yield Post_1.default.findOne(id);
             if (!post)
-                return null;
+                throw idDoesNotExistError;
             if (typeof title === 'string')
                 post.title = title;
             if (typeof description === 'string')
@@ -67,7 +74,7 @@ let PostResolver = class PostResolver {
         return __awaiter(this, void 0, void 0, function* () {
             const post = yield Post_1.default.findOne(id);
             if (!post)
-                return false;
+                throw idDoesNotExistError;
             if (typeof (yield post.remove()) !== 'undefined') {
                 return true;
             }

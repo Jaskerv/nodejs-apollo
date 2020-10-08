@@ -19,9 +19,11 @@ const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
 const colors_1 = __importDefault(require("colors"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const User_1 = __importDefault(require("./resolvers/User"));
 const Post_1 = __importDefault(require("./resolvers/Post"));
 const constants_1 = require("./constants");
+dotenv_1.default.config();
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const conn = yield typeorm_1.createConnection({
         type: 'postgres',
@@ -32,7 +34,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         database: 'lireddit',
         entities: [path_1.default.join(__dirname, './entities/*')],
         migrations: [path_1.default.join(__dirname, './migrations/*')],
-        logging: true,
+        logging: !constants_1.__prod__,
     });
     yield conn.runMigrations();
     const app = express_1.default();
@@ -41,11 +43,12 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             resolvers: [Post_1.default, User_1.default],
             validate: false,
         }),
+        debug: !constants_1.__prod__,
     });
     apolloServer.applyMiddleware({ app });
     app.listen(constants_1.__port__, () => {
         console.log(`\nServer started on port ${colors_1.default.yellow(`${constants_1.__port__}`)}\n`);
-        console.log(`${'Graphql playgound here:'.blue} ${colors_1.default.magenta.underline(`http://localhost:${constants_1.__port__}/graphql`)} 🚀\n`);
+        console.log(`${'Graphql playgound here:'.blue} 🚀 ${colors_1.default.magenta.underline(`http://localhost:${constants_1.__port__}/graphql`)} 🚀\n`);
     });
 });
 main();

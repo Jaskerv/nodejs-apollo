@@ -5,9 +5,12 @@ import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import colors from 'colors';
+import dotenv from 'dotenv';
 import UserResolver from './resolvers/User';
 import PostResolver from './resolvers/Post';
-import { __port__ } from './constants';
+import { __port__, __prod__ } from './constants';
+
+dotenv.config();
 
 const main = async () => {
   const conn = await createConnection({
@@ -25,7 +28,7 @@ const main = async () => {
      * * logging - outputs sql
      * * dropSchema - Drops the schema each time
      */
-    logging: true,
+    logging: !__prod__,
     // dropSchema: true,
   });
   await conn.runMigrations();
@@ -37,13 +40,14 @@ const main = async () => {
       resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
+    debug: !__prod__,
   });
 
   apolloServer.applyMiddleware({ app });
 
   app.listen(__port__, () => {
     console.log(`\nServer started on port ${colors.yellow(`${__port__}`)}\n`);
-    console.log(`${'Graphql playgound here:'.blue} ${colors.magenta.underline(`http://localhost:${__port__}/graphql`)} 🚀\n`);
+    console.log(`${'Graphql playgound here:'.blue} 🚀 ${colors.magenta.underline(`http://localhost:${__port__}/graphql`)} 🚀\n`);
   });
 };
 

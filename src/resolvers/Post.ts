@@ -1,7 +1,10 @@
+import { ApolloError } from 'apollo-server-express';
 import {
   Arg, Int, Mutation, Query, Resolver,
 } from 'type-graphql';
 import Post from '../entities/Post';
+
+const idDoesNotExistError = new ApolloError("This post doesn't exist");
 
 @Resolver()
 export default class PostResolver {
@@ -15,10 +18,12 @@ export default class PostResolver {
   }
 
   @Query(() => Post, { nullable: true })
-  post(
+  async post(
     @Arg('id', () => Int) id: number,
-  ) : Promise<Post | undefined> {
-    return Post.findOne(id);
+  ) : Promise<Post> {
+    const post = await Post.findOne(id);
+    if (!post) throw idDoesNotExistError;
+    return post;
   }
 
   @Mutation(() => Post)
@@ -27,7 +32,7 @@ export default class PostResolver {
     @Arg('description') description: string,
     @Arg('likes', () => Int, { defaultValue: 0 }) likes: number,
     @Arg('views', () => Int, { defaultValue: 0 }) views: number,
-  ) : Promise<Post | undefined> {
+  ) : Promise<Post> {
     const post = Post.create({
       title, description, likes, views,
     });
@@ -42,9 +47,9 @@ export default class PostResolver {
     @Arg('description', { nullable: true }) description: string,
     @Arg('likes', () => Int, { defaultValue: 0 }) likes: number,
     @Arg('views', () => Int, { defaultValue: 0 }) views: number,
-  ) : Promise<Post | null> {
+  ) : Promise<Post> {
     const post = await Post.findOne(id);
-    if (!post) return null;
+    if (!post) throw idDoesNotExistError;
     if (typeof title === 'string') post.title = title;
     if (typeof description === 'string') post.description = description;
     if (typeof likes === 'number') post.likes = likes;
@@ -58,7 +63,7 @@ export default class PostResolver {
     @Arg('id', () => Int) id: number,
   ) : Promise<boolean> {
     const post = await Post.findOne(id);
-    if (!post) return false;
+    if (!post) throw idDoesNotExistError;
     if (typeof await post.remove() !== 'undefined') {
       return true;
     }
