@@ -1,9 +1,10 @@
 import {
-  Arg, Field, InputType, Int, Mutation, Query, Resolver,
+  Arg, Ctx, Field, InputType, Int, Mutation, Query, Resolver,
 } from 'type-graphql';
 import argon2 from 'argon2';
 import { UserInputError, ApolloError, AuthenticationError } from 'apollo-server-express';
 import User from '../entities/User';
+import { Context } from '../types';
 
 @InputType()
 class PasswordConfirmInput {
@@ -41,6 +42,19 @@ const passwordMismatchError = new UserInputError('Password mismatch');
 
 @Resolver()
 export default class UserResolver {
+  @Query(() => User, { nullable: false })
+  async me(
+    @Ctx() { req }: Context,
+  ) : Promise<User> {
+    const id = req.session.userId;
+    if (!id) {
+      throw new AuthenticationError('User not logged in');
+    }
+    const user = await User.findOne(id);
+    if (!user) throw idDoesNotExistError;
+    return user;
+  }
+
   @Query(() => [User])
   users(): Promise<User[]> {
     return User.find({
@@ -62,6 +76,7 @@ export default class UserResolver {
   @Mutation(() => User, { nullable: true })
   async register(
     @Arg('options') options: UsernamePasswordConfirmInput,
+    @Ctx() { req }: Context,
   ) : Promise<User> {
     if (options.password !== options.confirmPassword) throw passwordMismatchError;
     const hashedPassword = await argon2.hash(options.password);
@@ -69,6 +84,10 @@ export default class UserResolver {
       username: options.username, password: hashedPassword,
     });
     await user.save();
+
+    // ! This will auto log the user in
+    req.session.userId = user.id;
+
     return user;
   }
 
@@ -86,13 +105,13 @@ export default class UserResolver {
       user.password = hashedPassword;
     } else throw passwordMismatchError;
 
-    await user.save();
     return user;
   }
 
   @Mutation(() => User, { nullable: true })
-  async login(
+  async signIn(
     @Arg('options') options: UsernamePasswordInput,
+    @Ctx() { req }: Context,
   ) : Promise<User> {
     const user = await User.findOne({ username: options.username });
     if (!user) throw new AuthenticationError('username does not exist');
@@ -100,6 +119,16 @@ export default class UserResolver {
     const valid = await argon2.verify(user.password, options.password);
     if (!valid) throw new AuthenticationError('Invalid login');
 
+    req.session.userId = user.id;
+
     return user;
+  }
+
+  @Mutation()
+  signOut(
+    @Ctx() { req }: Context,
+  ) : boolean {
+    req.session.userId = null;
+    return true;
   }
 }

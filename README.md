@@ -2,7 +2,7 @@
 Using Typescript.
 
 ## tsconfig
-
+Generate tsconfig
 ```npx tsconfig.json```
 
 ## nodemon vs tsc-watch
