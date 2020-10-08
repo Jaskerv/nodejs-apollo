@@ -1,17 +1,69 @@
-import Button from '@chakra-ui/core/dist/Button';
-import FormControl from '@chakra-ui/core/dist/FormControl';
-import FormErrorMessage from '@chakra-ui/core/dist/FormErrorMessage';
-import FormLabel from '@chakra-ui/core/dist/FormLabel';
-import Input from '@chakra-ui/core/dist/Input';
+import {
+  Button,
+  Divider,
+  Stack,
+  Text,
+} from '@chakra-ui/core';
 import { Form, Formik } from 'formik';
 import React, { ReactElement } from 'react';
+import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
+
+interface InputTypes {
+username: string
+password: string
+confirmPassword: string
+}
+
+const initialValues: InputTypes = {
+  username: '',
+  password: '',
+  confirmPassword: '',
+};
+const validate = ({ username, password, confirmPassword }:InputTypes) => {
+  let errors = {};
+  if (!username) {
+    errors = {
+      ...errors,
+      username: 'Username is required',
+    };
+  }
+  if (!password) {
+    errors = {
+      ...errors,
+      password: 'Password is required',
+    };
+  }
+  if (!confirmPassword) {
+    errors = {
+      ...errors,
+      confirmPassword: 'Password is required',
+    };
+  }
+  if (password && confirmPassword && password !== confirmPassword) {
+    errors = {
+      ...errors,
+      password: 'Password mismatch',
+      confirmPassword: 'Password mismatch',
+    };
+  }
+
+  return errors;
+};
 
 export default function FormikExample(): ReactElement {
   return (
     <Wrapper>
+      <Text
+        fontSize="4xl"
+        color="#2f4b5e"
+      >
+        Register
+      </Text>
+      <Divider mb={10} />
       <Formik
-        initialValues={{ username: '' }}
+        initialValues={initialValues}
+        validate={validate}
         onSubmit={(values, actions) => {
           setTimeout(() => {
             alert(JSON.stringify(values, null, 2));
@@ -19,25 +71,41 @@ export default function FormikExample(): ReactElement {
           }, 1000);
         }}
       >
-        {({ values, isSubmitting, handleChange }) => (
+        {({ isSubmitting }) => (
           <Form>
-            <FormControl>
-              <FormLabel htmlFor="username">Username</FormLabel>
-              <Input
-                id="username"
-                placeholder="Username"
-                value={values.username}
-                onChange={handleChange}
-              />
-            </FormControl>
-            <Button
-              mt={4}
-              variantColor="teal"
-              isLoading={isSubmitting}
-              type="submit"
+            <Stack
+              spacing={5}
+              shouldWrapChildren
             >
-              Submit
-            </Button>
+              <InputField
+                name="username"
+                placeholder="Username"
+                label="Username"
+                disabled={isSubmitting}
+              />
+              <InputField
+                name="password"
+                placeholder="Password"
+                label="Password"
+                type="password"
+                disabled={isSubmitting}
+              />
+              <InputField
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                label="Confirm Password"
+                type="password"
+                disabled={isSubmitting}
+              />
+              <Button
+                mt={4}
+                variantColor="teal"
+                isLoading={isSubmitting}
+                type="submit"
+              >
+                Submit
+              </Button>
+            </Stack>
           </Form>
         )}
       </Formik>
