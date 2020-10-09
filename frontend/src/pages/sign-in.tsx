@@ -13,48 +13,44 @@ import { Form, Formik } from 'formik';
 import React, {
   ReactElement, useCallback, useEffect, useState,
 } from 'react';
-import { object, string, ref } from 'yup';
+import { object, string } from 'yup';
 import { useRouter } from 'next/router';
 import { gql } from '@apollo/client';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-import { useRegisterMutation } from '../generated/graphql';
+import { useSignInMutation } from '../generated/graphql';
 
 interface InputTypes {
 username: string
 password: string
-confirmPassword: string
 }
 
 const initialValues: InputTypes = {
   username: '',
   password: '',
-  confirmPassword: '',
 };
 
 const validationSchema = object().shape({
   username: string().required().min(3).label('Username'),
   password: string().required().min(8).label('Password'),
-  confirmPassword: string().required().oneOf([ref('password'), ''], 'Password does not match').min(8)
-    .label('Confirm Password'),
 });
 
-export default function Register(): ReactElement {
-  const [register, { error }] = useRegisterMutation({
+export default function SignIn(): ReactElement {
+  const [signIn, { error }] = useSignInMutation({
     errorPolicy: 'all',
     update: (cache, fetchResult) => {
       cache.writeQuery({
         query: gql`
-      query Me{
-        me{
-          id
-          username
+        query Me{
+          me{
+            id
+            username
+          }
         }
-      }
-      `,
+        `,
         data: {
-          id: fetchResult.data?.register.id,
-          username: fetchResult.data?.register.username,
+          id: fetchResult.data?.signIn.id,
+          username: fetchResult.data?.signIn.username,
         },
       });
     },
@@ -80,7 +76,7 @@ export default function Register(): ReactElement {
         fontSize="4xl"
         color="blue.50"
       >
-        Register
+        Sign In
       </Text>
       <Divider mb={5} />
       {alertOpen && (
@@ -107,7 +103,9 @@ export default function Register(): ReactElement {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={async (values) => {
-          const response = await register({ variables: { options: values } });
+          const response = await signIn({
+            variables: { options: values },
+          });
           if (response.data) router.push('/');
         }}
       >
@@ -130,20 +128,13 @@ export default function Register(): ReactElement {
                 type="password"
                 disabled={isSubmitting}
               />
-              <InputField
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                label="Confirm Password"
-                type="password"
-                disabled={isSubmitting}
-              />
               <Button
                 mt={4}
                 variantColor="teal"
                 isLoading={isSubmitting}
                 type="submit"
               >
-                Register
+                Sign In
               </Button>
             </Stack>
           </Form>

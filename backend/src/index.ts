@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import connectRedis from 'connect-redis';
 import redis from 'redis';
 import session from 'express-session';
+import cors from 'cors';
 import UserResolver from './resolvers/User';
 import PostResolver from './resolvers/Post';
 import { __port__, __prod__ } from './constants';
@@ -46,6 +47,15 @@ const main = async () => {
    * * Session middleware needs to come first before apollo.
    * * This is because so that apollo can use session.
    */
+
+  app.use(
+    cors({
+      // TODO: Add origin to env
+      origin: 'http://localhost:3000',
+      credentials: true,
+    }),
+  );
+
   app.use(
     session({
       name: 'qid',
@@ -85,7 +95,10 @@ const main = async () => {
     context: ({ req, res }) => ({ req, res }),
   });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({
+    app,
+    cors: false,
+  });
 
   app.listen(__port__, () => {
     console.log(`\nServer started on port ${colors.yellow(`${__port__}`)}\n`);

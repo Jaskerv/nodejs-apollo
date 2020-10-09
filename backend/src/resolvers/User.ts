@@ -8,7 +8,7 @@ import User from '../entities/User';
 import { Context } from '../types';
 
 @InputType()
-class PasswordConfirMinLengthput {
+class PasswordConfirmInput {
   @Field()
   @MinLength(8)
   password: string
@@ -19,7 +19,7 @@ class PasswordConfirMinLengthput {
 }
 
 @InputType()
-class UsernamePasswordConfirMinLengthput {
+class UsernamePasswordConfirmInput {
   @Field()
   @MinLength(3)
   username: string
@@ -79,7 +79,7 @@ export default class UserResolver {
 
   @Mutation(() => User)
   async register(
-    @Arg('options') options: UsernamePasswordConfirMinLengthput,
+    @Arg('options') options: UsernamePasswordConfirmInput,
     @Ctx() { req }: Context,
   ) : Promise<User> {
     if (await User.findOne({ username: options.username })) throw new UserInputError('Username taken');
@@ -99,7 +99,7 @@ export default class UserResolver {
   @Mutation(() => User)
   async updatePassword(
     @Arg('id', () => Int) id: number,
-    @Arg('options') options: PasswordConfirMinLengthput,
+    @Arg('options') options: PasswordConfirmInput,
   ) : Promise<User> {
     const user = await User.findOneOrFail(id);
     if (typeof options.password !== 'undefined'

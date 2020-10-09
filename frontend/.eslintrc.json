@@ -53,6 +53,12 @@
                 "tsx": "never"
             }
         ],
-        "react/no-unescaped-entities": "off"
+        "react/no-unescaped-entities": "off",
+        "max-len": [
+            "warn",
+            {
+                "code": 120
+            }
+        ]
     }
 }
