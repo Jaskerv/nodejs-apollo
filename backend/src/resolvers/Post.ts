@@ -1,28 +1,28 @@
-import { ApolloError } from 'apollo-server-express';
 import {
   Arg, Int, Mutation, Query, Resolver,
 } from 'type-graphql';
 import Post from '../entities/Post';
 
-const idDoesNotExistError = new ApolloError("This post doesn't exist");
-
 @Resolver()
 export default class PostResolver {
   @Query(() => [Post])
-  posts(): Promise<Post[]> {
+  posts(
+    @Arg('withDeleted', { nullable: true }) withDeleted: boolean,
+  ): Promise<Post[]> {
     return Post.find({
       order: {
-        id: 'ASC',
+        createdAt: 'DESC',
       },
+      withDeleted,
     });
   }
 
-  @Query(() => Post, { nullable: true })
+  @Query(() => Post)
   async post(
     @Arg('id', () => Int) id: number,
+    @Arg('withDeleted', { nullable: true }) withDeleted: boolean,
   ) : Promise<Post> {
-    const post = await Post.findOne(id);
-    if (!post) throw idDoesNotExistError;
+    const post = await Post.findOneOrFail(id, { withDeleted });
     return post;
   }
 
@@ -40,7 +40,7 @@ export default class PostResolver {
     return post;
   }
 
-  @Mutation(() => Post, { nullable: true })
+  @Mutation(() => Post)
   async updatePost(
     @Arg('id', () => Int) id: number,
     @Arg('title', { nullable: true }) title: string,
@@ -48,8 +48,7 @@ export default class PostResolver {
     @Arg('likes', () => Int, { defaultValue: 0 }) likes: number,
     @Arg('views', () => Int, { defaultValue: 0 }) views: number,
   ) : Promise<Post> {
-    const post = await Post.findOne(id);
-    if (!post) throw idDoesNotExistError;
+    const post = await Post.findOneOrFail(id);
     if (typeof title === 'string') post.title = title;
     if (typeof description === 'string') post.description = description;
     if (typeof likes === 'number') post.likes = likes;
@@ -58,15 +57,12 @@ export default class PostResolver {
     return post;
   }
 
-  @Mutation(() => Boolean, { nullable: true })
+  @Mutation(() => Post, { nullable: true })
   async deletePost(
     @Arg('id', () => Int) id: number,
-  ) : Promise<boolean> {
-    const post = await Post.findOne(id);
-    if (!post) throw idDoesNotExistError;
-    if (typeof await post.remove() !== 'undefined') {
-      return true;
-    }
-    return false;
+  ) : Promise<Post> {
+    const post = await Post.findOneOrFail(id);
+    await post.softRemove();
+    return post;
   }
 }

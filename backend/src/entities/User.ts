@@ -11,13 +11,13 @@ export default class User extends BasicEntity {
 
   updatedAt: Date;
 
-  deletedAt: Date;
+  deletedAt?: Date;
 
   @Field()
   @Column({ type: 'text', unique: true })
-  username!: string;
+  username: string;
 
   @Field()
   @Column({ type: 'text', unique: true })
-  password!: string;
+  password: string;
 }

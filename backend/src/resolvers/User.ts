@@ -2,47 +2,53 @@ import {
   Arg, Ctx, Field, InputType, Int, Mutation, Query, Resolver,
 } from 'type-graphql';
 import argon2 from 'argon2';
-import { UserInputError, ApolloError, AuthenticationError } from 'apollo-server-express';
+import { UserInputError, AuthenticationError } from 'apollo-server-express';
+import { MinLength } from 'class-validator';
 import User from '../entities/User';
 import { Context } from '../types';
 
 @InputType()
-class PasswordConfirmInput {
+class PasswordConfirMinLengthput {
   @Field()
+  @MinLength(8)
   password: string
 
   @Field()
+  @MinLength(8)
   confirmPassword: string
 }
 
 @InputType()
-class UsernamePasswordConfirmInput {
+class UsernamePasswordConfirMinLengthput {
   @Field()
+  @MinLength(3)
   username: string
 
   @Field()
+  @MinLength(8)
   password: string
 
   @Field()
+  @MinLength(8)
   confirmPassword: string
 }
 
 @InputType()
 class UsernamePasswordInput {
   @Field()
+  @MinLength(3)
   username: string
 
   @Field()
+  @MinLength(8)
   password: string
 }
-
-const idDoesNotExistError = new ApolloError("This user doesn't exist");
 
 const passwordMismatchError = new UserInputError('Password mismatch');
 
 @Resolver()
 export default class UserResolver {
-  @Query(() => User, { nullable: false })
+  @Query(() => User)
   async me(
     @Ctx() { req }: Context,
   ) : Promise<User> {
@@ -50,8 +56,7 @@ export default class UserResolver {
     if (!id) {
       throw new AuthenticationError('User not logged in');
     }
-    const user = await User.findOne(id);
-    if (!user) throw idDoesNotExistError;
+    const user = await User.findOneOrFail(id);
     return user;
   }
 
@@ -64,20 +69,20 @@ export default class UserResolver {
     });
   }
 
-  @Query(() => User, { nullable: true })
+  @Query(() => User)
   async user(
     @Arg('id', () => Int) id: number,
   ) : Promise<User> {
-    const user = await User.findOne(id);
-    if (!user) throw idDoesNotExistError;
+    const user = await User.findOneOrFail(id);
     return user;
   }
 
-  @Mutation(() => User, { nullable: true })
+  @Mutation(() => User)
   async register(
-    @Arg('options') options: UsernamePasswordConfirmInput,
+    @Arg('options') options: UsernamePasswordConfirMinLengthput,
     @Ctx() { req }: Context,
   ) : Promise<User> {
+    if (await User.findOne({ username: options.username })) throw new UserInputError('Username taken');
     if (options.password !== options.confirmPassword) throw passwordMismatchError;
     const hashedPassword = await argon2.hash(options.password);
     const user = User.create({
@@ -91,13 +96,12 @@ export default class UserResolver {
     return user;
   }
 
-  @Mutation(() => User, { nullable: true })
+  @Mutation(() => User)
   async updatePassword(
     @Arg('id', () => Int) id: number,
-    @Arg('options') options: PasswordConfirmInput,
+    @Arg('options') options: PasswordConfirMinLengthput,
   ) : Promise<User> {
-    const user = await User.findOne(id);
-    if (!user) throw idDoesNotExistError;
+    const user = await User.findOneOrFail(id);
     if (typeof options.password !== 'undefined'
     && typeof options.confirmPassword !== 'undefined'
     && options.password === options.confirmPassword) {
@@ -108,16 +112,16 @@ export default class UserResolver {
     return user;
   }
 
-  @Mutation(() => User, { nullable: true })
+  @Mutation(() => User)
   async signIn(
     @Arg('options') options: UsernamePasswordInput,
     @Ctx() { req }: Context,
   ) : Promise<User> {
     const user = await User.findOne({ username: options.username });
-    if (!user) throw new AuthenticationError('username does not exist');
+    if (!user) throw new UserInputError('Username does not exist');
 
     const valid = await argon2.verify(user.password, options.password);
-    if (!valid) throw new AuthenticationError('Invalid login');
+    if (!valid) throw new UserInputError('Invalid login');
 
     req.session.userId = user.id;
 

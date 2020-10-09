@@ -1,11 +1,20 @@
+import { gql, useMutation } from '@apollo/client';
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
   Button,
+  CloseButton,
   Divider,
   Stack,
   Text,
 } from '@chakra-ui/core';
 import { Form, Formik } from 'formik';
-import React, { ReactElement } from 'react';
+import React, {
+  ReactElement, useCallback, useEffect, useState,
+} from 'react';
+import { object, string, ref } from 'yup';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
 
@@ -20,38 +29,43 @@ const initialValues: InputTypes = {
   password: '',
   confirmPassword: '',
 };
-const validate = ({ username, password, confirmPassword }:InputTypes) => {
-  let errors = {};
-  if (!username) {
-    errors = {
-      ...errors,
-      username: 'Username is required',
-    };
-  }
-  if (!password) {
-    errors = {
-      ...errors,
-      password: 'Password is required',
-    };
-  }
-  if (!confirmPassword) {
-    errors = {
-      ...errors,
-      confirmPassword: 'Password is required',
-    };
-  }
-  if (password && confirmPassword && password !== confirmPassword) {
-    errors = {
-      ...errors,
-      password: 'Password mismatch',
-      confirmPassword: 'Password mismatch',
-    };
-  }
 
-  return errors;
-};
+const validationSchema = object().shape({
+  username: string().required().min(3).label('Username'),
+  password: string().required().min(8).label('Password'),
+  confirmPassword: string().required().oneOf([ref('password'), null], 'Password does not match').min(8)
+    .label('Confirm Password'),
+});
 
-export default function FormikExample(): ReactElement {
+const REGISTER_USER = gql`
+mutation Register($username: String!, $password: String!, $confirmPassword: String!){
+  register(options: {
+    username: $username,
+    password: $password,
+    confirmPassword: $confirmPassword
+  }){
+    id
+    username
+    createdAt
+  }
+}
+`;
+
+export default function Register(): ReactElement {
+  const [register, { data, error }] = useMutation(REGISTER_USER, { errorPolicy: 'all' });
+
+  const [alertOpen, setAlertOpen] = useState(false);
+
+  useEffect(() => {
+    setAlertOpen(!!error || !!data);
+    return () => {
+      setAlertOpen(false);
+    };
+  });
+
+  const closeAlert = useCallback(() => {
+    setAlertOpen(false);
+  }, [setAlertOpen]);
   return (
     <Wrapper>
       <Text
@@ -60,15 +74,33 @@ export default function FormikExample(): ReactElement {
       >
         Register
       </Text>
-      <Divider mb={10} />
+      <Divider mb={5} />
+      {alertOpen && (
+      <Alert
+        status={data ? 'success' : 'error'}
+        mb={5}
+      >
+        <AlertIcon />
+        <AlertTitle mr={2}>
+          {`${data ? 'Success' : 'Oops'}!`}
+        </AlertTitle>
+        <AlertDescription>
+          {data ? `${data.register.username} created` : null}
+          {error?.message}
+        </AlertDescription>
+        <CloseButton
+          position="absolute"
+          right="8px"
+          top="8px"
+          onClick={closeAlert}
+        />
+      </Alert>
+      )}
       <Formik
         initialValues={initialValues}
-        validate={validate}
-        onSubmit={(values, actions) => {
-          setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-            actions.setSubmitting(false);
-          }, 1000);
+        validationSchema={validationSchema}
+        onSubmit={async (values) => {
+          await register({ variables: values });
         }}
       >
         {({ isSubmitting }) => (

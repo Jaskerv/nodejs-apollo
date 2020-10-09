@@ -19,5 +19,5 @@ export default abstract class BasicEntity extends BaseEntity {
 
   @Field(() => Date, { nullable: true })
   @DeleteDateColumn()
-  deletedAt: Date;
+  deletedAt?: Date;
 }
