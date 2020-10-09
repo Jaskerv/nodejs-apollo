@@ -77,9 +77,11 @@ const main = async () => {
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [PostResolver, UserResolver],
-      validate: false,
     }),
+    // * Debug - Enables stacktrace on GraphQL errors
     debug: !__prod__,
+    // * Tracing - Enables query performance metrics
+    tracing: !__prod__,
     context: ({ req, res }) => ({ req, res }),
   });
 
@@ -87,7 +89,9 @@ const main = async () => {
 
   app.listen(__port__, () => {
     console.log(`\nServer started on port ${colors.yellow(`${__port__}`)}\n`);
-    console.log(`${'Graphql playgound here:'.blue} 🚀 ${colors.magenta.underline(`http://localhost:${__port__}/graphql`)} 🚀\n`);
+    console.log(
+      `${'Graphql playgound here:'.blue} 🚀 ${colors.magenta.underline(`http://localhost:${__port__}/graphql`)} 🚀\n`,
+    );
   });
 };
 

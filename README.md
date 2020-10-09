@@ -48,3 +48,8 @@ In my opinion, tsc-watch is better than nodemon.
 ```
 #### requires:
  - tsc-watch
+
+
+## ApolloClient Error Policy
+```errorPolicy:'all'``` is better than ```errorPolicy: 'none'```
+

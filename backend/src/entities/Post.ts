@@ -14,7 +14,7 @@ export default class Post extends BasicEntity {
 
   updatedAt: Date;
 
-  deletedAt: Date;
+  deletedAt?: Date;
 
   @Field()
   @Column({
