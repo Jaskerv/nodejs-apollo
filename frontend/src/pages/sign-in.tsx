@@ -37,7 +37,6 @@ const validationSchema = object().shape({
 
 export default function SignIn(): ReactElement {
   const [signIn, { error }] = useSignInMutation({
-    errorPolicy: 'all',
     update: (cache, fetchResult) => {
       cache.writeQuery({
         query: gql`

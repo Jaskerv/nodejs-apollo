@@ -19,7 +19,6 @@ const NotSignedIn = () => (
 
 const SignedIn = () => {
   const [signOut] = useSignOutMutation({
-    errorPolicy: 'all',
     update: (cache) => {
       cache.writeQuery({
         query: gql`

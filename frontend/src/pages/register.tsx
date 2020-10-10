@@ -8,6 +8,7 @@ import {
   Divider,
   Stack,
   Text,
+  useToast,
 } from '@chakra-ui/core';
 import { Form, Formik } from 'formik';
 import React, {
@@ -41,7 +42,6 @@ const validationSchema = object().shape({
 
 export default function Register(): ReactElement {
   const [register, { error }] = useRegisterMutation({
-    errorPolicy: 'all',
     update: (cache, fetchResult) => {
       cache.writeQuery({
         query: gql`
@@ -63,7 +63,7 @@ export default function Register(): ReactElement {
   const [alertOpen, setAlertOpen] = useState(false);
 
   const router = useRouter();
-
+  const toast = useToast();
   useEffect(() => {
     setAlertOpen(!!error);
     return () => {
@@ -108,7 +108,16 @@ export default function Register(): ReactElement {
         validationSchema={validationSchema}
         onSubmit={async (values) => {
           const response = await register({ variables: { options: values } });
-          if (response.data) router.push('/');
+          if (response.data) {
+            toast({
+              title: 'Account created.',
+              description: "We've created your account for you. You are now signed in.",
+              status: 'success',
+              duration: 9000,
+              isClosable: true,
+            });
+            router.push('/');
+          }
         }}
       >
         {({ isSubmitting }) => (
