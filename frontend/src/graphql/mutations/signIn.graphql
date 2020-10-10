@@ -1,0 +1,6 @@
+mutation SignIn($options: UsernamePasswordInput!){
+  signIn(options: $options){
+    id
+    username
+  }
+}
