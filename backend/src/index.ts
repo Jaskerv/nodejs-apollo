@@ -12,7 +12,7 @@ import session from 'express-session';
 import cors from 'cors';
 import UserResolver from './resolvers/User';
 import PostResolver from './resolvers/Post';
-import { __port__, __prod__ } from './constants';
+import { COOKIE_NAME, __port__, __prod__ } from './constants';
 
 dotenv.config();
 
@@ -33,7 +33,7 @@ const main = async () => {
      * * dropSchema - Drops the schema each time
      */
     logging: !__prod__,
-    // dropSchema: !__prod__,
+    dropSchema: !__prod__,
   });
   await conn.runMigrations();
 
@@ -58,7 +58,7 @@ const main = async () => {
 
   app.use(
     session({
-      name: 'qid',
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
         /**

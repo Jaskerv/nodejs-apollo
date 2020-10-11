@@ -1,6 +1,5 @@
 mutation Register($options: UsernamePasswordConfirmInput!){
   register(options: $options){
-    id
-    username
+    ...RegularUser
   }
 }
