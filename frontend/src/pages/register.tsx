@@ -10,13 +10,14 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/core';
-import { Form, Formik } from 'formik';
 import React, {
   ReactElement, useCallback, useEffect, useState,
 } from 'react';
 import { object, string, ref } from 'yup';
 import { useRouter } from 'next/router';
 import { gql } from '@apollo/client';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
 import { useRegisterMutation } from '../generated/graphql';
@@ -27,7 +28,7 @@ password: string
 confirmPassword: string
 }
 
-const initialValues: InputTypes = {
+const defaultValues: InputTypes = {
   username: '',
   password: '',
   confirmPassword: '',
@@ -41,7 +42,7 @@ const validationSchema = object().shape({
 });
 
 export default function Register(): ReactElement {
-  const [register, { error }] = useRegisterMutation({
+  const [registerUser, { error }] = useRegisterMutation({
     update: (cache, fetchResult) => {
       cache.writeQuery({
         query: gql`
@@ -64,6 +65,7 @@ export default function Register(): ReactElement {
 
   const router = useRouter();
   const toast = useToast();
+
   useEffect(() => {
     setAlertOpen(!!error);
     return () => {
@@ -74,6 +76,29 @@ export default function Register(): ReactElement {
   const closeAlert = useCallback(() => {
     setAlertOpen(false);
   }, [setAlertOpen]);
+
+  const {
+    handleSubmit, errors, register, formState: { touched, isSubmitting },
+  } = useForm<InputTypes>({
+    resolver: yupResolver(validationSchema),
+    defaultValues,
+    mode: 'all',
+  });
+
+  const onSubmit: SubmitHandler<InputTypes> = async (values) => {
+    const response = await registerUser({ variables: { options: values } });
+    if (response.data) {
+      toast({
+        title: 'Account created.',
+        description: "We've created your account for you. You are now signed in.",
+        status: 'success',
+        duration: 9000,
+        isClosable: true,
+      });
+      router.push('/');
+    }
+  };
+
   return (
     <Wrapper>
       <Text
@@ -103,61 +128,50 @@ export default function Register(): ReactElement {
         />
       </Alert>
       )}
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={async (values) => {
-          const response = await register({ variables: { options: values } });
-          if (response.data) {
-            toast({
-              title: 'Account created.',
-              description: "We've created your account for you. You are now signed in.",
-              status: 'success',
-              duration: 9000,
-              isClosable: true,
-            });
-            router.push('/');
-          }
-        }}
-      >
-        {({ isSubmitting }) => (
-          <Form>
-            <Stack
-              spacing={5}
-              shouldWrapChildren
-            >
-              <InputField
-                name="username"
-                placeholder="Username"
-                label="Username"
-                disabled={isSubmitting}
-              />
-              <InputField
-                name="password"
-                placeholder="Password"
-                label="Password"
-                type="password"
-                disabled={isSubmitting}
-              />
-              <InputField
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                label="Confirm Password"
-                type="password"
-                disabled={isSubmitting}
-              />
-              <Button
-                mt={4}
-                variantColor="teal"
-                isLoading={isSubmitting}
-                type="submit"
-              >
-                Register
-              </Button>
-            </Stack>
-          </Form>
-        )}
-      </Formik>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Stack
+          spacing={5}
+          shouldWrapChildren
+        >
+          <InputField
+            name="username"
+            label="Username"
+            placeholder="Username"
+            error={errors.username?.message}
+            touched={touched.username}
+            isDisabled={isSubmitting}
+            ref={register}
+          />
+          <InputField
+            name="password"
+            label="Password"
+            placeholder="Password"
+            error={errors.password?.message}
+            touched={touched.password}
+            isDisabled={isSubmitting}
+            ref={register}
+            type="password"
+          />
+          <InputField
+            name="confirmPassword"
+            label="Confirm Password"
+            placeholder="Confirm Password"
+            error={errors.confirmPassword?.message}
+            touched={touched.confirmPassword}
+            isDisabled={isSubmitting}
+            ref={register}
+            type="password"
+          />
+          <Button
+            mt={4}
+            variantColor="teal"
+            isLoading={isSubmitting}
+            type="submit"
+          >
+            Register
+          </Button>
+        </Stack>
+      </form>
     </Wrapper>
   );
 }

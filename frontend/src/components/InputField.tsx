@@ -1,36 +1,39 @@
 import {
-  FormControl, FormLabel, Input, FormErrorMessage,
+  FormControl, FormLabel, Input, FormErrorMessage, InputProps,
 } from '@chakra-ui/core';
-import { useField } from 'formik';
-import React, { InputHTMLAttributes, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 
-type InputFieldProps = InputHTMLAttributes<HTMLInputElement>&{
+type InputFieldProps = InputProps & {
   label: string
-  name: string
   placeholder?: string
+  error?: string
+  touched?: boolean
 }
 
-function InputField({
-  label, placeholder, size: _, ...otherProps
-}: InputFieldProps): ReactElement {
-  const [field, { error, touched }] = useField(otherProps);
-  return (
-    <FormControl isInvalid={error && touched}>
-      <FormLabel htmlFor={field.name}>
+const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
+  ({
+    label, placeholder, size: _, error, touched, name, ...otherProps
+  }: InputFieldProps, ref): ReactElement => (
+    <FormControl isInvalid={!!error && !!touched}>
+      <FormLabel htmlFor={name}>
         {label}
       </FormLabel>
       <Input
-        {...field}
         {...otherProps}
-        id={field.name}
+        id={name}
+        name={name}
         placeholder={placeholder}
+        ref={ref}
       />
-      {error && touched ? <FormErrorMessage>{error}</FormErrorMessage> : null}
+      <FormErrorMessage>{error}</FormErrorMessage>
     </FormControl>
-  );
-}
+  ),
+);
+
 InputField.defaultProps = {
   placeholder: '',
+  error: '',
+  touched: false,
 };
 
 export default InputField;
