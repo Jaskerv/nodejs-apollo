@@ -9,13 +9,14 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/core';
-import { Form, Formik } from 'formik';
 import React, {
   ReactElement, useCallback, useEffect, useState,
 } from 'react';
 import { object, string } from 'yup';
 import { useRouter } from 'next/router';
 import { gql } from '@apollo/client';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
 import { useSignInMutation } from '../generated/graphql';
@@ -25,7 +26,7 @@ username: string
 password: string
 }
 
-const initialValues: InputTypes = {
+const defaultValues: InputTypes = {
   username: '',
   password: '',
 };
@@ -69,6 +70,22 @@ export default function SignIn(): ReactElement {
   const closeAlert = useCallback(() => {
     setAlertOpen(false);
   }, [setAlertOpen]);
+
+  const {
+    handleSubmit, errors, register, formState: { touched, isSubmitting },
+  } = useForm<InputTypes>({
+    resolver: yupResolver(validationSchema),
+    defaultValues,
+    mode: 'all',
+  });
+
+  const onSubmit: SubmitHandler<InputTypes> = async (values) => {
+    const response = await signIn({
+      variables: { options: values },
+    });
+    if (response.data) router.push('/');
+  };
+
   return (
     <Wrapper>
       <Text
@@ -98,47 +115,42 @@ export default function SignIn(): ReactElement {
         />
       </Alert>
       )}
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={async (values) => {
-          const response = await signIn({
-            variables: { options: values },
-          });
-          if (response.data) router.push('/');
-        }}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
       >
-        {({ isSubmitting }) => (
-          <Form>
-            <Stack
-              spacing={5}
-              shouldWrapChildren
-            >
-              <InputField
-                name="username"
-                placeholder="Username"
-                label="Username"
-                disabled={isSubmitting}
-              />
-              <InputField
-                name="password"
-                placeholder="Password"
-                label="Password"
-                type="password"
-                disabled={isSubmitting}
-              />
-              <Button
-                mt={4}
-                variantColor="teal"
-                isLoading={isSubmitting}
-                type="submit"
-              >
-                Sign In
-              </Button>
-            </Stack>
-          </Form>
-        )}
-      </Formik>
+        <Stack
+          spacing={5}
+          shouldWrapChildren
+        >
+          <InputField
+            name="username"
+            label="Username"
+            placeholder="Username"
+            error={errors.username?.message}
+            touched={touched.username}
+            isDisabled={isSubmitting}
+            ref={register}
+          />
+          <InputField
+            name="password"
+            label="Password"
+            placeholder="Password"
+            error={errors.password?.message}
+            touched={touched.password}
+            isDisabled={isSubmitting}
+            ref={register}
+            type="password"
+          />
+          <Button
+            mt={4}
+            variantColor="teal"
+            isLoading={isSubmitting}
+            type="submit"
+          >
+            Sign In
+          </Button>
+        </Stack>
+      </form>
     </Wrapper>
   );
 }
