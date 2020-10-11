@@ -47,11 +47,7 @@ const SignedIn = () => {
 };
 
 function NavBar(): ReactElement {
-  const { data, loading } = useMeQuery();
-
-  if (loading) {
-    return <Text>Test</Text>;
-  }
+  const { data } = useMeQuery();
 
   let dropDownContent = <NotSignedIn />;
 
