@@ -14,12 +14,12 @@ import React, {
 } from 'react';
 import { object, string } from 'yup';
 import { useRouter } from 'next/router';
-import { gql } from '@apollo/client';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-import { useSignInMutation } from '../generated/graphql';
+import { MeDocument, MeQuery, useSignInMutation } from '../generated/graphql';
+import { withApollo } from '../utils/withApollo';
 
 interface InputTypes {
 username: string
@@ -36,21 +36,14 @@ const validationSchema = object().shape({
   password: string().required().min(8).label('Password'),
 });
 
-export default function SignIn(): ReactElement {
+function SignIn(): ReactElement {
   const [signIn, { error }] = useSignInMutation({
-    update: (cache, fetchResult) => {
-      cache.writeQuery({
-        query: gql`
-        query Me{
-          me{
-            id
-            username
-          }
-        }
-        `,
+    update: (cache, { data }) => {
+      cache.writeQuery<MeQuery>({
+        query: MeDocument,
         data: {
-          id: fetchResult.data?.signIn.id,
-          username: fetchResult.data?.signIn.username,
+          __typename: 'Query',
+          me: data?.signIn,
         },
       });
     },
@@ -154,3 +147,5 @@ export default function SignIn(): ReactElement {
     </Wrapper>
   );
 }
+
+export default withApollo({ ssr: false })(SignIn);

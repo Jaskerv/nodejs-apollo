@@ -59,6 +59,7 @@
             {
                 "code": 120
             }
-        ]
+        ],
+        "import/prefer-default-export": "off"
     }
 }

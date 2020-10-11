@@ -2,10 +2,11 @@ import {
   Arg, Ctx, Field, InputType, Int, Mutation, Query, Resolver,
 } from 'type-graphql';
 import argon2 from 'argon2';
-import { UserInputError, AuthenticationError } from 'apollo-server-express';
+import { UserInputError } from 'apollo-server-express';
 import { MinLength } from 'class-validator';
 import User from '../entities/User';
 import { Context } from '../types';
+import { COOKIE_NAME } from '../constants';
 
 @InputType()
 class PasswordConfirmInput {
@@ -48,13 +49,13 @@ const passwordMismatchError = new UserInputError('Password mismatch');
 
 @Resolver()
 export default class UserResolver {
-  @Query(() => User)
+  @Query(() => User, { nullable: true })
   async me(
     @Ctx() { req }: Context,
-  ) : Promise<User> {
+  ) : Promise<User|null> {
     const id = req.session.userId;
     if (!id) {
-      throw new AuthenticationError('User not logged in');
+      return null;
     }
     const user = await User.findOneOrFail(id);
     return user;
@@ -128,11 +129,17 @@ export default class UserResolver {
     return user;
   }
 
-  @Mutation()
+  @Mutation(() => Boolean)
   signOut(
-    @Ctx() { req }: Context,
-  ) : boolean {
-    req.session.userId = null;
-    return true;
+    @Ctx() { res, req }: Context,
+  ) : Promise<boolean> {
+    return new Promise((resolve) => req.session.destroy((err) => {
+      res.clearCookie(COOKIE_NAME);
+      if (err) {
+        resolve(false);
+        return;
+      }
+      resolve(true);
+    }));
   }
 }

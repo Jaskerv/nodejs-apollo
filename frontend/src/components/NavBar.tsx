@@ -5,6 +5,7 @@ import React, { ReactElement } from 'react';
 import NextLink from 'next/link';
 import { gql, useApolloClient } from '@apollo/client';
 import { useMeQuery, useSignOutMutation } from '../generated/graphql';
+import { withApollo } from '../utils/withApollo';
 
 const NotSignedIn = () => (
   <>
@@ -45,8 +46,12 @@ const SignedIn = () => {
   );
 };
 
-export default function NavBar(): ReactElement {
-  const { data } = useMeQuery({ errorPolicy: 'all' });
+function NavBar(): ReactElement {
+  const { data, loading } = useMeQuery();
+
+  if (loading) {
+    return <Text>Test</Text>;
+  }
 
   let dropDownContent = <NotSignedIn />;
 
@@ -81,7 +86,7 @@ export default function NavBar(): ReactElement {
         </Text>
       </NextLink>
       <Menu>
-        <Avatar as={MenuButton} size="sm" name={data?.me.username} />
+        <Avatar as={MenuButton} size="sm" name={data?.me?.username} />
         <MenuList>
           {dropDownContent}
         </MenuList>
@@ -89,3 +94,5 @@ export default function NavBar(): ReactElement {
     </Box>
   );
 }
+
+export default withApollo({ ssr: true })(NavBar);

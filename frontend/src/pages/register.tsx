@@ -15,12 +15,12 @@ import React, {
 } from 'react';
 import { object, string, ref } from 'yup';
 import { useRouter } from 'next/router';
-import { gql } from '@apollo/client';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-import { useRegisterMutation } from '../generated/graphql';
+import { MeDocument, MeQuery, useRegisterMutation } from '../generated/graphql';
+import { withApollo } from '../utils/withApollo';
 
 interface InputTypes {
 username: string
@@ -41,21 +41,14 @@ const validationSchema = object().shape({
     .label('Confirm Password'),
 });
 
-export default function Register(): ReactElement {
+function Register(): ReactElement {
   const [registerUser, { error }] = useRegisterMutation({
-    update: (cache, fetchResult) => {
-      cache.writeQuery({
-        query: gql`
-      query Me{
-        me{
-          id
-          username
-        }
-      }
-      `,
+    update: (cache, { data }) => {
+      cache.writeQuery<MeQuery>({
+        query: MeDocument,
         data: {
-          id: fetchResult.data?.register.id,
-          username: fetchResult.data?.register.username,
+          __typename: 'Query',
+          me: data?.register,
         },
       });
     },
@@ -175,3 +168,5 @@ export default function Register(): ReactElement {
     </Wrapper>
   );
 }
+
+export default withApollo({ ssr: false })(Register);
