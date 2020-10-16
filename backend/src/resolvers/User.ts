@@ -3,10 +3,14 @@ import {
 } from 'type-graphql';
 import argon2 from 'argon2';
 import { UserInputError } from 'apollo-server-express';
-import { MinLength } from 'class-validator';
+import { IsEmail, MinLength } from 'class-validator';
+import { v4 } from 'uuid';
 import User from '../entities/User';
 import { Context } from '../types';
-import { COOKIE_NAME } from '../constants';
+import {
+  REDIS_COOKIE_NAME, FRONTEND_RESET_PASSWORD_ROUTE, FRONTEND_URL, REDIS_PASSWORD_RESET_PREFIX,
+} from '../constants';
+import { sendMail } from '../util/mailer';
 
 @InputType()
 class PasswordConfirmInput {
@@ -20,7 +24,14 @@ class PasswordConfirmInput {
 }
 
 @InputType()
-class UsernamePasswordConfirmInput {
+class EmailInput {
+  @Field()
+  @IsEmail()
+  email: string
+}
+
+@InputType()
+class UsernameEmailPasswordConfirmInput extends EmailInput {
   @Field()
   @MinLength(3)
   username: string
@@ -35,11 +46,7 @@ class UsernamePasswordConfirmInput {
 }
 
 @InputType()
-class UsernamePasswordInput {
-  @Field()
-  @MinLength(3)
-  username: string
-
+class EmailPasswordInput extends EmailInput {
   @Field()
   @MinLength(8)
   password: string
@@ -47,7 +54,7 @@ class UsernamePasswordInput {
 
 const passwordMismatchError = new UserInputError('Password mismatch');
 
-@Resolver()
+@Resolver(User)
 export default class UserResolver {
   @Query(() => User, { nullable: true })
   async me(
@@ -80,14 +87,19 @@ export default class UserResolver {
 
   @Mutation(() => User)
   async register(
-    @Arg('options') options: UsernamePasswordConfirmInput,
+    @Arg('options') options: UsernameEmailPasswordConfirmInput,
     @Ctx() { req }: Context,
   ) : Promise<User> {
-    if (await User.findOne({ username: options.username })) throw new UserInputError('Username taken');
+    if (await User.findOne({ username: options.username }, { withDeleted: true })) {
+      throw new UserInputError('Username taken');
+    }
+    if (await User.findOne({ email: options.email }, { withDeleted: true })) {
+      throw new UserInputError('Email taken');
+    }
     if (options.password !== options.confirmPassword) throw passwordMismatchError;
     const hashedPassword = await argon2.hash(options.password);
     const user = User.create({
-      username: options.username, password: hashedPassword,
+      username: options.username, password: hashedPassword, email: options.email,
     });
     await user.save();
 
@@ -115,10 +127,10 @@ export default class UserResolver {
 
   @Mutation(() => User)
   async signIn(
-    @Arg('options') options: UsernamePasswordInput,
+    @Arg('options') options: EmailPasswordInput,
     @Ctx() { req }: Context,
   ) : Promise<User> {
-    const user = await User.findOne({ username: options.username });
+    const user = await User.findOne({ email: options.email });
     if (!user) throw new UserInputError('Username does not exist');
 
     const valid = await argon2.verify(user.password, options.password);
@@ -134,12 +146,33 @@ export default class UserResolver {
     @Ctx() { res, req }: Context,
   ) : Promise<boolean> {
     return new Promise((resolve) => req.session.destroy((err) => {
-      res.clearCookie(COOKIE_NAME);
+      res.clearCookie(REDIS_COOKIE_NAME);
       if (err) {
         resolve(false);
         return;
       }
       resolve(true);
     }));
+  }
+
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Arg('email') email: string,
+    @Ctx() { redis }: Context,
+  ) : Promise<boolean> {
+    const user = await User.findOne({ email });
+    if (user) {
+      const token = v4();
+
+      // * expires in 3 days
+      redis.set(REDIS_PASSWORD_RESET_PREFIX + token, user.id, 'ex', 1000 * 60 * 60 * 24 * 3);
+
+      const html = `<a href="${FRONTEND_URL}${FRONTEND_RESET_PASSWORD_ROUTE}/${token}">Reset Password</a>`;
+
+      sendMail({
+        to: user.email, from: 'password-recovery@test.com', subject: 'Password Recovery', html,
+      });
+    }
+    return true;
   }
 }

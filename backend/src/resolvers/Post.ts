@@ -3,7 +3,7 @@ import {
 } from 'type-graphql';
 import Post from '../entities/Post';
 
-@Resolver()
+@Resolver(Post)
 export default class PostResolver {
   @Query(() => [Post])
   posts(

@@ -5,16 +5,15 @@ import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import colors from 'colors';
-import dotenv from 'dotenv';
 import connectRedis from 'connect-redis';
-import redis from 'redis';
+import Redis from 'ioredis';
 import session from 'express-session';
 import cors from 'cors';
 import UserResolver from './resolvers/User';
 import PostResolver from './resolvers/Post';
-import { COOKIE_NAME, __port__, __prod__ } from './constants';
-
-dotenv.config();
+import {
+  REDIS_COOKIE_NAME, __port__, __prod__,
+} from './constants';
 
 const main = async () => {
   const conn = await createConnection({
@@ -33,12 +32,12 @@ const main = async () => {
      * * dropSchema - Drops the schema each time
      */
     logging: !__prod__,
-    dropSchema: !__prod__,
+    // dropSchema: !__prod__,
   });
   await conn.runMigrations();
 
   const RedisStore = connectRedis(session);
-  const redisClient = redis.createClient();
+  const redis = new Redis();
 
   const app = express();
 
@@ -58,9 +57,9 @@ const main = async () => {
 
   app.use(
     session({
-      name: COOKIE_NAME,
+      name: REDIS_COOKIE_NAME,
       store: new RedisStore({
-        client: redisClient,
+        client: redis,
         /**
          * * Updates sessions to upon interaction.
          * * set to true to reduce calls to redis.
@@ -74,7 +73,7 @@ const main = async () => {
         httpOnly: true,
         // * cookie only works in https
         secure: __prod__,
-        // * csrf
+        // * Cross Site Request Forgery
         sameSite: 'lax',
       },
       saveUninitialized: false,
@@ -92,7 +91,7 @@ const main = async () => {
     debug: !__prod__,
     // * Tracing - Enables query performance metrics
     tracing: !__prod__,
-    context: ({ req, res }) => ({ req, res }),
+    context: ({ req, res }) => ({ req, res, redis }),
   });
 
   apolloServer.applyMiddleware({
@@ -101,10 +100,12 @@ const main = async () => {
   });
 
   app.listen(__port__, () => {
-    console.log(`\nServer started on port ${colors.yellow(`${__port__}`)}\n`);
-    console.log(
-      `${'Graphql playgound here:'.blue} 🚀 ${colors.magenta.underline(`http://localhost:${__port__}/graphql`)} 🚀\n`,
-    );
+    if (!__prod__) {
+      console.log(`\nServer started on port ${colors.yellow(`${__port__}`)}\n`);
+      console.log(
+        `${'Graphql playgound here:'.blue} 🚀 ${colors.magenta.underline(`http://localhost:${__port__}/graphql`)} 🚀\n`,
+      );
+    }
   });
 };
 
