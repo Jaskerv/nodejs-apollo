@@ -1,4 +1,4 @@
-mutation SignIn($options: UsernamePasswordInput!){
+mutation SignIn($options: EmailPasswordInput!){
   signIn(options: $options){
     ...RegularUser
   }

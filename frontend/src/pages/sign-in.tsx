@@ -22,17 +22,17 @@ import { MeDocument, MeQuery, useSignInMutation } from '../generated/graphql';
 import { withApollo } from '../utils/withApollo';
 
 interface InputTypes {
-username: string
+email: string
 password: string
 }
 
 const defaultValues: InputTypes = {
-  username: '',
+  email: '',
   password: '',
 };
 
 const validationSchema = object().shape({
-  username: string().required().min(3).label('Username'),
+  email: string().required().email().label('Email'),
   password: string().required().min(8).label('Password'),
 });
 
@@ -116,18 +116,16 @@ function SignIn(): ReactElement {
           shouldWrapChildren
         >
           <InputField
-            name="username"
-            label="Username"
-            placeholder="Username"
-            error={errors.username?.message}
-            touched={touched.username}
+            name="email"
+            label="Email"
+            error={errors.email?.message}
+            touched={touched.email}
             isDisabled={isSubmitting}
             ref={register}
           />
           <InputField
             name="password"
             label="Password"
-            placeholder="Password"
             error={errors.password?.message}
             touched={touched.password}
             isDisabled={isSubmitting}

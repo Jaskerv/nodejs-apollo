@@ -16,6 +16,7 @@ import {
 } from './constants';
 
 const main = async () => {
+  // @ts-ignore
   const conn = await createConnection({
     type: 'postgres',
     host: 'localhost',
@@ -30,10 +31,13 @@ const main = async () => {
      * ! Do not enable dropSchema in production
      * * logging - outputs SQL
      * * dropSchema - Drops the schema each time
+     * * synchronize - Synchronizes entities to database,
      */
     logging: !__prod__,
-    // dropSchema: !__prod__,
+    dropSchema: !__prod__,
+    // synchronize: !__prod__,
   });
+
   await conn.runMigrations();
 
   const RedisStore = connectRedis(session);

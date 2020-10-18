@@ -131,10 +131,10 @@ export default class UserResolver {
     @Ctx() { req }: Context,
   ) : Promise<User> {
     const user = await User.findOne({ email: options.email });
-    if (!user) throw new UserInputError('Username does not exist');
+    if (!user) throw new UserInputError('Email does not exist');
 
     const valid = await argon2.verify(user.password, options.password);
-    if (!valid) throw new UserInputError('Invalid login');
+    if (!valid) throw new UserInputError('Email or password incorrect');
 
     req.session.userId = user.id;
 

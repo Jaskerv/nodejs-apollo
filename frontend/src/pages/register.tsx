@@ -24,12 +24,14 @@ import { withApollo } from '../utils/withApollo';
 
 interface InputTypes {
 username: string
+email: string
 password: string
 confirmPassword: string
 }
 
 const defaultValues: InputTypes = {
   username: '',
+  email: '',
   password: '',
   confirmPassword: '',
 };
@@ -39,6 +41,7 @@ const validationSchema = object().shape({
   password: string().required().min(8).label('Password'),
   confirmPassword: string().required().oneOf([ref('password'), ''], 'Password does not match').min(8)
     .label('Confirm Password'),
+  email: string().required().email().label('Email'),
 });
 
 function Register(): ReactElement {
@@ -129,16 +132,22 @@ function Register(): ReactElement {
           <InputField
             name="username"
             label="Username"
-            placeholder="Username"
             error={errors.username?.message}
             touched={touched.username}
             isDisabled={isSubmitting}
             ref={register}
           />
           <InputField
+            name="email"
+            label="Email"
+            error={errors.email?.message}
+            touched={touched.email}
+            isDisabled={isSubmitting}
+            ref={register}
+          />
+          <InputField
             name="password"
             label="Password"
-            placeholder="Password"
             error={errors.password?.message}
             touched={touched.password}
             isDisabled={isSubmitting}
@@ -148,7 +157,6 @@ function Register(): ReactElement {
           <InputField
             name="confirmPassword"
             label="Confirm Password"
-            placeholder="Confirm Password"
             error={errors.confirmPassword?.message}
             touched={touched.confirmPassword}
             isDisabled={isSubmitting}

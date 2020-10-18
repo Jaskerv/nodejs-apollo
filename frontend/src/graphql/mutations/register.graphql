@@ -1,4 +1,4 @@
-mutation Register($options: UsernamePasswordConfirmInput!){
+mutation Register($options: UsernameEmailPasswordConfirmInput!){
   register(options: $options){
     ...RegularUser
   }
