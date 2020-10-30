@@ -8,6 +8,7 @@ import {
   Divider,
   Stack,
   Text,
+  Link as ChakraLink,
 } from '@chakra-ui/core';
 import React, {
   ReactElement, useCallback, useEffect, useState,
@@ -16,6 +17,7 @@ import { object, string } from 'yup';
 import { useRouter } from 'next/router';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import Link from 'next/link';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
 import { MeDocument, MeQuery, useSignInMutation } from '../generated/graphql';
@@ -65,7 +67,7 @@ function SignIn(): ReactElement {
   }, [setAlertOpen]);
 
   const {
-    handleSubmit, errors, register, formState: { touched, isSubmitting },
+    handleSubmit, errors, register, formState: { touched, isSubmitting, submitCount },
   } = useForm<InputTypes>({
     resolver: yupResolver(validationSchema),
     defaultValues,
@@ -119,7 +121,7 @@ function SignIn(): ReactElement {
             name="email"
             label="Email"
             error={errors.email?.message}
-            touched={touched.email}
+            touched={touched.email || submitCount > 0}
             isDisabled={isSubmitting}
             ref={register}
           />
@@ -127,11 +129,16 @@ function SignIn(): ReactElement {
             name="password"
             label="Password"
             error={errors.password?.message}
-            touched={touched.password}
+            touched={touched.password || submitCount > 0}
             isDisabled={isSubmitting}
             ref={register}
             type="password"
           />
+          <Link href="/forgot-password">
+            <ChakraLink>
+              Forgot Password
+            </ChakraLink>
+          </Link>
           <Button
             mt={4}
             variantColor="teal"

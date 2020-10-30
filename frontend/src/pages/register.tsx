@@ -74,7 +74,7 @@ function Register(): ReactElement {
   }, [setAlertOpen]);
 
   const {
-    handleSubmit, errors, register, formState: { touched, isSubmitting },
+    handleSubmit, errors, register, formState: { touched, isSubmitting, submitCount },
   } = useForm<InputTypes>({
     resolver: yupResolver(validationSchema),
     defaultValues,
@@ -133,7 +133,7 @@ function Register(): ReactElement {
             name="username"
             label="Username"
             error={errors.username?.message}
-            touched={touched.username}
+            touched={touched.username || submitCount > 0}
             isDisabled={isSubmitting}
             ref={register}
           />
@@ -141,7 +141,7 @@ function Register(): ReactElement {
             name="email"
             label="Email"
             error={errors.email?.message}
-            touched={touched.email}
+            touched={touched.email || submitCount > 0}
             isDisabled={isSubmitting}
             ref={register}
           />
@@ -149,7 +149,7 @@ function Register(): ReactElement {
             name="password"
             label="Password"
             error={errors.password?.message}
-            touched={touched.password}
+            touched={touched.password || submitCount > 0}
             isDisabled={isSubmitting}
             ref={register}
             type="password"
@@ -158,7 +158,7 @@ function Register(): ReactElement {
             name="confirmPassword"
             label="Confirm Password"
             error={errors.confirmPassword?.message}
-            touched={touched.confirmPassword}
+            touched={touched.confirmPassword || submitCount > 0}
             isDisabled={isSubmitting}
             ref={register}
             type="password"
