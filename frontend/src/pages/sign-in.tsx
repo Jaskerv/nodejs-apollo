@@ -134,7 +134,7 @@ function SignIn(): ReactElement {
             ref={register}
             type="password"
           />
-          <Link href="/forgot-password">
+          <Link href="/recover-password">
             <ChakraLink>
               Forgot Password
             </ChakraLink>

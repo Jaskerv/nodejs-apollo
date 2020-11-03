@@ -156,7 +156,7 @@ export default class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async forgotPassword(
+  async recoverPassword(
     @Arg('email') email: string,
     @Ctx() { redis }: Context,
   ) : Promise<boolean> {
