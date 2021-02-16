@@ -16,8 +16,7 @@ import {
 } from './constants';
 
 const main = async () => {
-  // @ts-ignore
-  const conn = await createConnection({
+  const dbConnection = await createConnection({
     type: 'postgres',
     host: 'localhost',
     port: 5432,
@@ -35,10 +34,10 @@ const main = async () => {
      */
     logging: !__prod__,
     // dropSchema: !__prod__,
-    // synchronize: !__prod__,
+    synchronize: !__prod__,
   });
 
-  await conn.runMigrations();
+  await dbConnection.runMigrations();
 
   const RedisStore = connectRedis(session);
   const redis = new Redis();

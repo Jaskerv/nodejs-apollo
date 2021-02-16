@@ -2,13 +2,15 @@ import {
   Arg, Ctx, Field, InputType, Int, Mutation, Query, Resolver,
 } from 'type-graphql';
 import argon2 from 'argon2';
-import { UserInputError } from 'apollo-server-express';
+import { ApolloError, UserInputError } from 'apollo-server-express';
 import { IsEmail, MinLength } from 'class-validator';
 import { v4 } from 'uuid';
 import User from '../entities/User';
 import { Context } from '../types';
 import {
-  REDIS_COOKIE_NAME, FRONTEND_RESET_PASSWORD_ROUTE, FRONTEND_URL, REDIS_PASSWORD_RESET_PREFIX,
+  REDIS_COOKIE_NAME,
+  REDIS_PASSWORD_RESET_PREFIX,
+  // FRONTEND_RESET_PASSWORD_ROUTE, FRONTEND_URL,
 } from '../constants';
 import { sendMail } from '../util/mailer';
 
@@ -50,6 +52,16 @@ class EmailPasswordInput extends EmailInput {
   @Field()
   @MinLength(8)
   password: string
+}
+
+@InputType()
+class ResetPasswordInput extends PasswordConfirmInput {
+  @Field()
+  token: string
+
+  @Field()
+  @MinLength(8)
+  currentPassword: string
 }
 
 const passwordMismatchError = new UserInputError('Password mismatch');
@@ -167,12 +179,33 @@ export default class UserResolver {
       // * expires in 3 days
       redis.set(REDIS_PASSWORD_RESET_PREFIX + token, user.id, 'ex', 1000 * 60 * 60 * 24 * 3);
 
-      const html = `<a href="${FRONTEND_URL}${FRONTEND_RESET_PASSWORD_ROUTE}/${token}">Reset Password</a>`;
+      const html = `<a href="http://localhost:3000/reset-password/${token}">Reset Password</a>`;
 
       sendMail({
         to: user.email, from: 'password-recovery@test.com', subject: 'Password Recovery', html,
       });
     }
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  async resetPassword(
+    @Arg('options') {
+      token, password,
+    }: ResetPasswordInput,
+    @Ctx() { redis }: Context,
+  ) : Promise<boolean> {
+    const stringedUserId = await redis.get(REDIS_PASSWORD_RESET_PREFIX + token);
+    if (!stringedUserId) {
+      throw new ApolloError('Password token reset does not exist');
+    }
+
+    const user = await User.findOne({ id: parseInt(stringedUserId, 10) });
+    if (!user) throw new UserInputError('User does not exist');
+
+    const valid = await argon2.verify(user.password, password);
+    if (!valid) throw new UserInputError('Password incorrect');
+
     return true;
   }
 }

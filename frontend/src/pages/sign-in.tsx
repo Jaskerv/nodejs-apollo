@@ -1,10 +1,5 @@
 import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Button,
-  CloseButton,
   Divider,
   Stack,
   Text,
@@ -22,6 +17,7 @@ import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
 import { MeDocument, MeQuery, useSignInMutation } from '../generated/graphql';
 import { withApollo } from '../utils/withApollo';
+import ErrorAlert from '../components/ErrorAlert';
 
 interface InputTypes {
 email: string
@@ -62,7 +58,7 @@ function SignIn(): ReactElement {
     };
   }, [error]);
 
-  const closeAlert = useCallback(() => {
+  const handleCloseAlert = useCallback(() => {
     setAlertOpen(false);
   }, [setAlertOpen]);
 
@@ -90,26 +86,11 @@ function SignIn(): ReactElement {
         Sign In
       </Text>
       <Divider mb={5} />
-      {alertOpen && (
-      <Alert
-        status="error"
-        mb={5}
-      >
-        <AlertIcon />
-        <AlertTitle mr={2}>
-          Oops!
-        </AlertTitle>
-        <AlertDescription>
-          {error?.message}
-        </AlertDescription>
-        <CloseButton
-          position="absolute"
-          right="8px"
-          top="8px"
-          onClick={closeAlert}
-        />
-      </Alert>
-      )}
+      <ErrorAlert
+        open={alertOpen}
+        onClose={handleCloseAlert}
+        errorMessage={error?.message}
+      />
       <form
         onSubmit={handleSubmit(onSubmit)}
       >

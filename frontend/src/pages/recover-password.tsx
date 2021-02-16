@@ -1,13 +1,13 @@
 import {
-  Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, CloseButton, Divider, Flex, Icon, IconButton, Text,
+  Box, Button, Divider, Flex, IconButton, Text,
 } from '@chakra-ui/core';
 import { yupResolver } from '@hookform/resolvers/yup';
-// import { useRouter } from 'next/router';
 import React, {
   ReactElement, useCallback, useEffect, useState,
 } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { object, string } from 'yup';
+import ErrorAlert from '../components/ErrorAlert';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
 import { useRecoverPasswordMutation } from '../generated/graphql';
@@ -52,7 +52,7 @@ function RecoveryPassword(): ReactElement {
     };
   }, [error]);
 
-  const closeAlert = useCallback(() => {
+  const handleCloseAlert = useCallback(() => {
     reset();
     setEmailSent(false);
   }, [setEmailSent, reset]);
@@ -119,26 +119,11 @@ function RecoveryPassword(): ReactElement {
         Recover Password
       </Text>
       <Divider mb={5} />
-      {alertOpen && (
-      <Alert
-        status="error"
-        mb={5}
-      >
-        <AlertIcon />
-        <AlertTitle mr={2}>
-          Oops!
-        </AlertTitle>
-        <AlertDescription>
-          {error?.message}
-        </AlertDescription>
-        <CloseButton
-          position="absolute"
-          right="8px"
-          top="8px"
-          onClick={closeAlert}
-        />
-      </Alert>
-      )}
+      <ErrorAlert
+        open={alertOpen}
+        onClose={handleCloseAlert}
+        errorMessage={error?.message}
+      />
       {content}
     </Wrapper>
   );
