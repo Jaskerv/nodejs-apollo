@@ -33,7 +33,7 @@ const main = async () => {
      * * synchronize - Synchronizes entities to database,
      */
     logging: !__prod__,
-    // dropSchema: !__prod__,
+    dropSchema: !__prod__,
     synchronize: !__prod__,
   });
 

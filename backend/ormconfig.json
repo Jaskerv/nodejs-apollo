@@ -5,6 +5,10 @@
   "username": "docker",
   "password": "docker",
   "database": "lireddit",
-  "entities": ["dist/entities/*.js"],
-  "migrations": ["dist/migrations/*.js"]
+  "entities": [
+    "dist/entities/*.js"
+  ],
+  "migrations": [
+    "dist/migrations/*.js"
+  ]
 }
